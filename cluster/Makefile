@@ -29,5 +29,10 @@ argocd-pw: ## ArgoCD 초기 admin 비밀번호를 확인합니다.
 	@echo ""
 
 argocd-pf: ## 로컬에서 ArgoCD UI에 접근하기 위해 포트포워딩을 실행합니다 (localhost:38080).
-	@echo "포트포워딩 실행 중... (http://localhost:38080 으로 접속하세요. 종료하려면 Ctrl+C)"
+	@echo "ArgoCD 포트포워딩 실행 중... (http://localhost:38080 으로 접속하세요. 종료하려면 Ctrl+C)"
 	kubectl port-forward svc/argocd-server -n argocd 38080:443
+
+grafana-pf: ## 로컬에서 Grafana UI에 접근하기 위해 포트포워딩을 실행합니다 (localhost:3000).
+	@echo "Grafana 포트포워딩 실행 중... (http://localhost:3000 으로 접속하세요. 종료하려면 Ctrl+C)"
+	@echo "ID: admin / PW: admin"
+	kubectl port-forward svc/grafana -n monitoring 3000:80
