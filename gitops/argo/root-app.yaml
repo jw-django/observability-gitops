@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/jw-django/observability-gitops.git
     targetRevision: main
-    path: gitops/argo/apps
+    path: gitops/argo
     directory:
       recurse: true 
   destination:
