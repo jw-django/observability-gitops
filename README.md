@@ -40,6 +40,7 @@ make argocd-pf
 gitops/argo/apps 하위의 모든 설정을 자동으로 관리하는 Root Application을 배포합니다.
 ```
 # 프로젝트 루트 디렉토리에서 실행
+# cd ..
 kubectl apply -f gitops/argo/root-app.yaml
 ```
 
