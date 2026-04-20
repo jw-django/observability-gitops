@@ -13,7 +13,7 @@ spec:
       chart: tempo # tempo-distributed 대신 tempo 사용 - 로컬 리소스 사용 최소화
       helm:
         valueFiles:
-          - $value/gitops/manifests/global/plgt/tempo-values.yaml 
+          - $value/gitops/manifests/monitoring/tempo-values.yaml 
     - repoURL: https://github.com/jw-django/observability-gitops.git
       targetRevision: main
       ref: value
