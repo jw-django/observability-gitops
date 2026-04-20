@@ -1,0 +1,49 @@
+fullnameOverride: tempo-cluster
+
+tempo:
+  # 로컬 스토리지 사용
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
+
+  compactor:
+    compaction:
+      block_retention: 48h # 2일
+      compaction_concurrency: 1
+      max_compaction_objects: 3000
+      max_block_bytes: 1073741824 # 1GB로 축소 (로컬용)
+
+  overrides:
+    defaults:
+      global:
+        max_bytes_per_trace: 5000000 # 5MB 이상 버림 (비정상 트레이스 방어)
+      ingestion:
+        rate_limit_bytes: 2000000    # 초당 2MB
+        burst_size_bytes: 4000000    # 버스트 4MB
+
+# otlp receiver
+traces:
+  otlp:
+    grpc:
+      enabled: true
+    http:
+      enabled: true
+
+serviceAccount:
+  create: true
+  annotations: {} # IRSA 제거
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: standard
+
+# 캐시 및 Gateway 비활성화
+memcached:
+  enabled: false
+gateway:
+  enabled: false

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: loki
+  name: tempo
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -9,18 +9,20 @@ spec:
   project: default
   sources:
     - repoURL: https://grafana.github.io/helm-charts
-      targetRevision: 6.43.0
-      chart: loki
+      targetRevision: 1.24.4
+      chart: tempo # tempo-distributed 대신 tempo 사용 - 로컬 리소스 사용 최소화
       helm:
         valueFiles:
-        - $value/gitops/manifests/monitoring/loki-values.yaml
+          - $value/gitops/manifests/global/plgt/tempo-values.yaml 
     - repoURL: https://github.com/jw-django/observability-gitops.git
       targetRevision: main
       ref: value
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring
+    namespace: monitoring 
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

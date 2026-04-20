@@ -15,7 +15,7 @@ spec:
       chart: kube-prometheus-stack
       helm:
         valueFiles:
-        - $value/gitops/manifests/monitoring/prometheus/values.yaml
+        - $value/gitops/manifests/monitoring/prom-values.yaml
     - repoURL: https://github.com/jw-django/observability-gitops.git
       targetRevision: main
       ref: value
