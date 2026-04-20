@@ -14,3 +14,20 @@ cluster-down: ## Kind 클러스터를 삭제합니다.
 	@echo "K8s 클러스터($(CLUSTER_NAME))를 삭제합니다..."
 	kind delete cluster --name $(CLUSTER_NAME)
 	@echo "클러스터 삭제 완료!"
+
+argocd-install: ## 클러스터에 ArgoCD를 설치합니다.
+	@echo "ArgoCD를 설치합니다..."
+	kubectl create namespace argocd || true
+	kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --server-side
+	@echo "ArgoCD Pod들이 Ready 상태가 될 때까지 기다립니다..."
+	kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s
+	@echo "ArgoCD 설치 완료!"
+
+argocd-pw: ## ArgoCD 초기 admin 비밀번호를 확인합니다.
+	@echo "ArgoCD 초기 비밀번호:"
+	@kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+	@echo ""
+
+argocd-pf: ## 로컬에서 ArgoCD UI에 접근하기 위해 포트포워딩을 실행합니다 (localhost:38080).
+	@echo "포트포워딩 실행 중... (http://localhost:38080 으로 접속하세요. 종료하려면 Ctrl+C)"
+	kubectl port-forward svc/argocd-server -n argocd 38080:443
