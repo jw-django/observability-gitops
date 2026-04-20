@@ -1,0 +1,38 @@
+# Grafana 별도 배포
+grafana:
+  enabled: false
+
+# 로컬 환경에서는 워커 노드가 단 2개뿐이므로 스케줄링 제약(nodeSelector, Tolerations) 제거
+prometheusOperator:
+  enabled: true
+  admissionWebhooks:
+    failurePolicy: Ignore
+
+prometheus:
+  prometheusSpec:
+    enableRemoteWriteReceiver: true
+    retention: 2d 
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard 
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
+
+    # Alloy 연동을 위해 여기서는 비워둠
+    remoteWrite: []
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
