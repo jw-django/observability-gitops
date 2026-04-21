@@ -5,16 +5,15 @@
 시작하기 전 아래 도구들이 설치되어 있어야 합니다.
 
 - Docker Desktop
-- kind (brew install kind)
-- kubectl (brew install kubernetes-cli)
+- kind (`brew install kind`)
+- kubectl (`brew install kubernetes-cli`)
 
 ## Quick Start (실행 순서)
-모든 인프라 구축은 cluster 디렉토리 내의 Makefile을 통해 자동화되어 있습니다.
+모든 인프라 구축은 루트 디렉토리 내의 Makefile을 통해 자동화되어 있습니다.
 
 ### 1. k8s 클러스터 프로비저닝
 1개의 Master 노드와 2개의 Worker 노드로 구성된 kind 클러스터를 생성합니다.
 ```
-cd cluster
 make cluster-up
 ```
 
@@ -37,13 +36,26 @@ make argocd-pf
 - ID: admin / PW: 위에서 확인한 비밀번호
 
 ### 4. GitOps Root App 배포 (App of Apps)
-gitops/argo/apps 하위의 모든 설정을 자동으로 관리하는 Root Application을 배포합니다.
+`gitops/argo/apps` 하위의 모든 설정을 자동으로 관리하는 Root Application을 배포합니다.
 ```
-# 프로젝트 루트 디렉토리에서 실행
-# cd ..
 kubectl apply -f gitops/argo/root-app.yaml
 ```
+- Sync가 되면서 Pod 들이 배포됩니다.
 
+### 5. Grafana UI 접속 (대시보드)
+ArgoCD를 통해 옵저버빌리티 스택 배포가 완료된 후, 아래 명령어를 통해 Grafana에 접속하여 메트릭, 로그, 트레이스를 확인합니다.
+```
+# 포트 포워딩 실행 (다른 터미널에서 유지)
+make grafana-pf
+```
+- 접속: localhost:3000
+- ID: admin / PW: admin
+
+### 6. 리소스 정리
+모든 작업이 끝난 후 아래 명령어로 클러스터를 삭제합니다.
+```
+make cluster-down
+```
 
 ## System Architecture
 ### GitOps Structure (App of Apps Pattern)
