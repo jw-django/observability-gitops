@@ -11,10 +11,19 @@ spec:
     path: gitops/charts/spring-boot-app
     helm:
       values: |
+        nameOverride: order-service
         image:
           repository: devjw/order-service
           tag: 20260421-132409-d7208ca
-        nameOverride: order-service
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "1Gi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+        env:
+          JAVA_OPTS: "-XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
   destination:
     server: https://kubernetes.default.svc
     namespace: msa
