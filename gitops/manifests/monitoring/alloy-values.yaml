@@ -105,6 +105,14 @@ alloy:
           source_labels = ["__meta_kubernetes_pod_node_name"]
           target_label = "node" 
         }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app"]
+          target_label = "app"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+          target_label = "app"
+        }
       }
 
       // 로그 수집 -> Loki
@@ -117,7 +125,7 @@ alloy:
         forward_to = [loki.write.central.receiver]
         rule { 
           action = "labelkeep"
-          regex = "namespace|pod|container|node" 
+          regex = "namespace|pod|container|node|app" 
         }
       }
 
