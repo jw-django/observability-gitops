@@ -14,7 +14,7 @@ spec:
         nameOverride: payment-service
         image:
           repository: devjw/payment-service
-          tag: 20260421-132409-d7208ca
+          tag: 20260421-151221-db2243a
         resources:
           requests:
             cpu: "100m"
