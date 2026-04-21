@@ -13,7 +13,7 @@ spec:
       values: |
         image:
           repository: devjw/order-service
-          tag: latest
+          tag: 20260421-105857-51cd937
         nameOverride: order-service
   destination:
     server: https://kubernetes.default.svc
