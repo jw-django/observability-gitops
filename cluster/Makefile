@@ -42,7 +42,7 @@ TIMESTAMP := $(shell date +%Y%m%d-%H%M%S)
 GIT_HASH := $(shell git rev-parse --short HEAD)
 VERSION := $(TIMESTAMP)-$(GIT_HASH)
 
-deploy: java-build update-manifest git-push
+deploy: java-build update-manifest git-push ## 빌드 이후 태그 변경 후 푸시합니다.
 
 java-build:
 	@echo "새로운 버전($(VERSION))으로 도커 빌드 및 푸시를 시작합니다..."

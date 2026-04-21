@@ -4,6 +4,10 @@ spring:
   threads:
     virtual:
       enabled: true
+  cloud:
+    openfeign:
+      micrometer:
+        enabled: true
 
 server:
   port: 8080
@@ -18,7 +22,8 @@ management:
   tracing:
     sampling:
       probability: 1.0 # 모든 요청 트레이싱 (테스트 환경이므로)
-  
+    propagation:
+      type: w3c
   otlp:
     tracing:
       # Alloy의 OTLP HTTP Receiver 주소
