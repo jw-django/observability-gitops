@@ -38,11 +38,30 @@ grafana-pf: ## 로컬에서 Grafana UI에 접근하기 위해 포트포워딩을
 	kubectl port-forward svc/grafana -n monitoring 3000:80
 
 DOCKER_USER := devjw
-VERSION := latest
+TIMESTAMP := $(shell date +%Y%m%d-%H%M%S)
+GIT_HASH := $(shell git rev-parse --short HEAD)
+VERSION := $(TIMESTAMP)-$(GIT_HASH)
 
-java-build: ## Java 앱들을 빌드하고 Docker Hub에 푸시합니다.
-	@echo "이미지 빌드 및 푸시 중..."
+deploy: java-build update-manifest git-push
+
+java-build:
+	@echo "새로운 버전($(VERSION))으로 도커 빌드 및 푸시를 시작합니다..."
 	docker build -t $(DOCKER_USER)/order-service:$(VERSION) -f ../apps/order-service/Dockerfile ../apps
 	docker build -t $(DOCKER_USER)/payment-service:$(VERSION) -f ../apps/payment-service/Dockerfile ../apps
 	docker push $(DOCKER_USER)/order-service:$(VERSION)
 	docker push $(DOCKER_USER)/payment-service:$(VERSION)
+
+update-manifest:
+	@echo "ArgoCD 매니페스트의 태그를 $(VERSION)으로 업데이트합니다..."
+	sed -i.bak "s/tag: .*/tag: $(VERSION)/" ../gitops/argo/apps/msa/order-app.yaml
+	sed -i.bak "s/tag: .*/tag: $(VERSION)/" ../gitops/argo/apps/msa/payment-app.yaml
+	rm -f ../gitops/argo/apps/msa/*.bak
+
+git-push:
+	@echo "변경된 K8s 매니페스트를 Git에 자동 Commit & Push 합니다..."
+	# 변경된 yaml 파일만 스테이징
+	cd .. && git add gitops/argo/apps/msa/order-app.yaml gitops/argo/apps/msa/payment-app.yaml
+	cd .. && git commit -m "chore: deploy version $(VERSION)"
+	cd .. && git push
+	@echo "배포 파이프라인 완료! ArgoCD가 $(VERSION) 버전으로 Sync를 시작합니다."
+
