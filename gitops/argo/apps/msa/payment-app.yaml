@@ -13,7 +13,7 @@ spec:
       values: |
         image:
           repository: devjw/payment-service
-          tag: 20260421-105857-51cd937
+          tag: 20260421-110500-41d755e
         nameOverride: payment-service
   destination:
     server: https://kubernetes.default.svc
