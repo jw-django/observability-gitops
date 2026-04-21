@@ -51,7 +51,17 @@ make grafana-pf
 - 접속: localhost:3000
 - ID: admin / PW: admin
 
-### 6. 리소스 정리
+### 6. 통합 대시보드 시각화 (Grafana)
+
+커뮤니티 표준 대시보드를 기반으로, Alloy에 맞게 쿼리를 직접 최적화했습니다.
+
+1. `make grafana-pf` 실행 후 `http://localhost:3000` 접속 (ID/PW: admin/admin)
+2. 좌측 메뉴 **[Dashboards]** -> 우측 상단 **[New]** -> **[Import]** 클릭
+3. 리포지토리의 `docs/k8s-cluster-dashboard.json` 파일을 업로드하여 대시보드 구성 완료
+
+---
+
+### 7. 리소스 정리
 모든 작업이 끝난 후 아래 명령어로 클러스터를 삭제합니다.
 ```
 make cluster-down
@@ -59,13 +69,15 @@ make cluster-down
 
 ## System Architecture
 ### GitOps Structure (App of Apps Pattern)
-실무의 다중 환경 관리 기법을 모사하여 directory.recurse: true 설정을 적용했습니다.
+- `gitops/argo/`: CD 오케스트레이션 및 배포 정의
+  - App-of-Apps 패턴을 적용하여 클러스터 전체 리소스를 계층적으로 관리합니다.
+  - Root App 및 각 서비스(MSA, Monitoring 스택 등)의 ArgoCD Application 리소스를 정의합니다.
 
-- gitops/argo/: ArgoCD Application CRD 관리 (Root App 진입점)
+- `gitops/manifests/`: 공통 인프라 및 옵저버빌리티(PLGT) 스택의 실제 동작 방식을 결정하는 Helm Values 파일들을 관리합니다.
 
-- gitops/manifests/: 공통 인프라 및 옵저버빌리티(PLGT) 스택
-
-- gitops/charts/: 마이크로서비스별 Helm Charts
+- `gitops/charts/`: 마이크로서비스 공통 템플릿
+  - 마이크로서비스 공통 Helm Chart입니다.
+  - 각 서비스들이 동일한 구조로 배포될 수 있도록 템플릿화하였습니다.
 
 ### Observability Stack
 - Prometheus: Metrics 수집 및 저장
