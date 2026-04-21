@@ -1,0 +1,49 @@
+nameOverride: ""
+
+replicaCount: 1
+
+image:
+  repository: "" # 배포 시 주입
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# Spring Boot Actuator 기반 상태 검사
+probes:
+  startup:
+    enabled: true
+    path: /actuator/health/liveness
+    initialDelaySeconds: 5
+    periodSeconds: 2
+    failureThreshold: 30
+    timeoutSeconds: 2
+
+  liveness:
+    path: /actuator/health/liveness
+    periodSeconds: 10
+    failureThreshold: 3
+    timeoutSeconds: 3
+
+  readiness:
+    path: /actuator/health/readiness
+    periodSeconds: 10
+    failureThreshold: 3
+    timeoutSeconds: 3
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+serviceMonitor:
+  enabled: true
+  path: /actuator/prometheus
+  interval: 15s
+
+env: {} # 추가 환경변수 주입용

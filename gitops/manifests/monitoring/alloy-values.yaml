@@ -1,0 +1,144 @@
+controller:
+  type: daemonset
+
+alloy:
+  extraEnv:
+    - name: HOSTNAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+          
+  extraPorts:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+
+  configMap:
+    create: true
+    content: |
+      // 1. OTLP 수신
+      otelcol.receiver.otlp "default" {
+        grpc { endpoint = "0.0.0.0:4317" }
+        http { endpoint = "0.0.0.0:4318" }
+        output {
+          traces  = [otelcol.processor.k8sattributes.main.input]
+          metrics = []
+          logs    = []
+        }
+      }
+
+      // 트레이스에 K8s 메타데이터(파드명 등) 부착
+      otelcol.processor.k8sattributes "main" {
+        extract {
+          metadata = ["k8s.namespace.name", "k8s.pod.name", "k8s.deployment.name"]
+        }
+        output { traces = [otelcol.processor.batch.main.input] }
+      }
+
+      // 배치 처리로 성능 최적화
+      otelcol.processor.batch "main" {
+        output {
+          // 트레이스를 Tempo로 보내고, 동시에 RED 메트릭 생성기로도 보냄 (파이프라인 분기)
+          traces = [otelcol.exporter.otlp.tempo.input, otelcol.connector.spanmetrics.red.input]
+        }
+      }
+
+      // 트레이스 -> RED 메트릭 생성
+      otelcol.connector.spanmetrics "red" {
+        dimension { name = "http.method" }
+        dimension { name = "http.route" }
+        dimension { name = "http.status_code" }
+        histogram {
+          explicit {
+            buckets = ["5ms", "10ms", "25ms", "50ms", "100ms", "250ms", "500ms", "1s", "2.5s", "5s", "10s"]
+          }
+        }
+        output { metrics = [otelcol.exporter.prometheus.spanmetrics.input] }
+      }
+
+      otelcol.exporter.prometheus "spanmetrics" {
+        forward_to = [prometheus.remote_write.central.receiver]
+      }
+
+      // Tempo
+      otelcol.exporter.otlp "tempo" {
+        client { 
+          endpoint = "tempo-cluster.monitoring.svc.cluster.local:4317"
+          tls {
+            insecure = true
+            insecure_skip_verify = true
+          }
+        }
+      }
+
+      // 현재 노드의 파드만 필터링하여 디스커버리
+      discovery.kubernetes "pods_on_node" {
+        role = "pod"
+        selectors {
+          role  = "pod"
+          field = "spec.nodeName=" + coalesce(sys.env("HOSTNAME"), constants.hostname)
+        }
+        attach_metadata { node = true }
+      }
+
+      // 공용 라벨 보강 (Loki, Prometheus가 동일한 라벨을 갖도록 정규화)
+      discovery.relabel "enriched_targets" {
+        targets = discovery.kubernetes.pods_on_node.targets
+        rule { 
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label = "namespace" 
+        }
+        rule { 
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label = "pod" 
+        }
+        rule { 
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label = "container" 
+        }
+        rule { 
+          source_labels = ["__meta_kubernetes_pod_node_name"]
+          target_label = "node" 
+        }
+      }
+
+      // 로그 수집 -> Loki
+      loki.source.kubernetes "pod_logs" {
+        targets    = discovery.relabel.enriched_targets.output
+        forward_to = [loki.relabel.stream.receiver]
+      }
+
+      loki.relabel "stream" {
+        forward_to = [loki.write.central.receiver]
+        rule { 
+          action = "labelkeep"
+          regex = "namespace|pod|container|node" 
+        }
+      }
+
+      // 수집된 로그를 중앙 Loki로 전송
+      loki.write "central" {
+        endpoint {
+          // 로컬 Loki 엔드포인트 (인증 없이 사용)
+          url = "http://loki-gateway.monitoring.svc.cluster.local:80/loki/api/v1/push"
+        }
+      }
+
+      // 메트릭 스크레이프 -> Prometheus
+      prometheus.scrape "pods" {
+        scrape_interval = "30s"
+        targets    = discovery.relabel.enriched_targets.output
+        forward_to = [prometheus.remote_write.central.receiver]
+      }
+
+      // 수집된 메트릭을 중앙 Prometheus로 전송
+      prometheus.remote_write "central" {
+        endpoint {
+          url = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+        }
+      }

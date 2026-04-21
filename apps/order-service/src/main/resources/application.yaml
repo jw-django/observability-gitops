@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: order-service
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  
+  # Observability 설정
+  tracing:
+    sampling:
+      probability: 1.0 # 모든 요청 트레이싱 (테스트 환경이므로)
+  
+  otlp:
+    tracing:
+      # Alloy의 OTLP HTTP Receiver 주소
+      endpoint: "http://alloy.monitoring.svc.cluster.local:4318/v1/traces"
+    metrics:
+      export:
+        url: "http://alloy.monitoring.svc.cluster.local:4318/v1/metrics"
+        step: 15s
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

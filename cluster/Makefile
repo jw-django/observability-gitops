@@ -36,3 +36,13 @@ grafana-pf: ## 로컬에서 Grafana UI에 접근하기 위해 포트포워딩을
 	@echo "Grafana 포트포워딩 실행 중... (http://localhost:3000 으로 접속하세요. 종료하려면 Ctrl+C)"
 	@echo "ID: admin / PW: admin"
 	kubectl port-forward svc/grafana -n monitoring 3000:80
+
+DOCKER_USER := devjw
+VERSION := latest
+
+java-build: ## Java 앱들을 빌드하고 Docker Hub에 푸시합니다.
+	@echo "이미지 빌드 및 푸시 중..."
+	docker build -t $(DOCKER_USER)/order-service:$(VERSION) -f ../apps/order-service/Dockerfile ../apps
+	docker build -t $(DOCKER_USER)/payment-service:$(VERSION) -f ../apps/payment-service/Dockerfile ../apps
+	docker push $(DOCKER_USER)/order-service:$(VERSION)
+	docker push $(DOCKER_USER)/payment-service:$(VERSION)
