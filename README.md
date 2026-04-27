@@ -67,7 +67,13 @@ make cluster-up
 make argocd-install
 ```
 
-### 3. ArgoCD UI 접속
+### 3. GitOps Root App 배포
+```
+kubectl apply -f gitops/argo/root-app.yaml
+```
+- App of Apps 패턴으로 전체 리소스 자동 배포
+
+### 4. ArgoCD UI 접속
 ```
 # 초기 비밀번호 확인
 make argocd-pw
@@ -77,13 +83,6 @@ make argocd-pf
 ```
 - 접속: localhost:38080
 - ID: admin / PW: 출력값 확인
-
-
-### 4. GitOps Root App 배포
-```
-kubectl apply -f gitops/argo/root-app.yaml
-```
-- App of Apps 패턴으로 전체 리소스 자동 배포
 
 ### 5. Grafana UI 접속
 ```

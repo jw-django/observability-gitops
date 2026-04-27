@@ -118,7 +118,7 @@ alloy:
       // 로그 수집 -> Loki
       loki.source.kubernetes "pod_logs" {
         targets    = discovery.relabel.enriched_targets.output
-        forward_to = [loki.relabel.parse_json.receiver]
+        forward_to = [loki.process.parse_json.receiver]
       }
       
       // 파이프라인: JSON 파싱
