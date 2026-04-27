@@ -14,7 +14,7 @@ spec:
         nameOverride: order-service
         image:
           repository: devjw/order-service
-          tag: 20260427-143052-7f68832
+          tag: 20260427-150434-39d9bfc
         resources:
           requests:
             cpu: "250m"
