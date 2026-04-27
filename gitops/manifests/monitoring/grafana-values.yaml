@@ -3,6 +3,16 @@ deploymentStrategy:
 
 adminPassword: "admin"
 
+# init container 비활성화
+initChownData:
+  enabled: false
+
+# k8s에서 권한 부여
+podSecurityContext:
+  fsGroup: 472 # 볼륨 마운트 시 이 그룹 id로 소유권 부여
+  runAsUser: 472 # grafana를 472로 실행
+  runAsGroup: 472
+
 datasources:
   datasources.yaml:
     apiVersion: 1
