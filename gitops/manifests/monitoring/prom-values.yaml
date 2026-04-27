@@ -34,6 +34,13 @@ prometheus:
 
 alertmanager:
   alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
     storage:
       volumeClaimTemplate:
         spec:
@@ -43,3 +50,21 @@ alertmanager:
           resources:
             requests:
               storage: 2Gi
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 50Mi
+    limits:
+      cpu: 100m
+      memory: 100Mi
