@@ -40,8 +40,7 @@ datasources:
             filterByTraceID: true  # traceId 매칭 활성화
             filterBySpanID: false
 
-            customQuery: true
-            query: '{$__tags} | json | traceId="${__span.traceId}"'
+            customQuery: false
 
 persistence:
   enabled: true
