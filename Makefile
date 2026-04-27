@@ -8,7 +8,11 @@ help: ## 사용 가능한 명령어 목록을 보여줍니다.
 cluster-up: ## Kind 클러스터를 생성합니다.
 	@echo "K8s 클러스터($(CLUSTER_NAME))를 생성합니다..."
 	kind create cluster --name $(CLUSTER_NAME) --config cluster/kind-config.yaml
-	@echo "클러스터 생성 완료! (kubectl get nodes 로 확인하세요)"
+	@echo "클러스터 생성 완료! (kubectl get nodes 로 확인하세요) Metric Server를 추가로 배포합니다..."
+	kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+	kubectl patch -n kube-system deployment metrics-server --type=json \
+  	-p '[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+	@echo "Metric Server 배포 완료!"
 
 cluster-down: ## Kind 클러스터를 삭제합니다.
 	@echo "K8s 클러스터($(CLUSTER_NAME))를 삭제합니다..."
@@ -21,7 +25,9 @@ argocd-install: ## 클러스터에 ArgoCD를 설치합니다.
 	kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --server-side
 	@echo "ArgoCD Pod들이 Ready 상태가 될 때까지 기다립니다..."
 	kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s
-	@echo "ArgoCD 설치 완료!"
+	@echo "ArgoCD 설치 완료! Root-app을 배포합니다..."
+	kubectl apply -f gitops/argo/root-app.yaml
+	@echo "Root App 배포 완료!"
 
 argocd-pw: ## ArgoCD 초기 admin 비밀번호를 확인합니다.
 	@echo "ArgoCD 초기 비밀번호:"
