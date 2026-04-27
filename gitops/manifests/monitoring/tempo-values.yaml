@@ -9,7 +9,13 @@ tempo:
         path: /var/tempo/traces
       wal:
         path: /var/tempo/wal
-
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
   compactor:
     compaction:
       block_retention: 48h # 2일

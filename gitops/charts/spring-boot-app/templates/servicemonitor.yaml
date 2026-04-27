@@ -2,6 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: {{ include "spring-boot-app.fullname" . }}
   labels:
     {{- include "spring-boot-app.labels" . | nindent 4 }}

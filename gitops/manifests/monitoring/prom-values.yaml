@@ -11,7 +11,7 @@ prometheusOperator:
 prometheus:
   prometheusSpec:
     enableRemoteWriteReceiver: true
-    retention: 2d 
+    retention: 2d # 2일 보존
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -21,6 +21,13 @@ prometheus:
           resources:
             requests:
               storage: 5Gi
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 200m
+      limits:
+        memory: 2Gi
+        cpu: 1000m
 
     # Alloy 연동을 위해 여기서는 비워둠
     remoteWrite: []

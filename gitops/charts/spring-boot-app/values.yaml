@@ -36,10 +36,10 @@ probes:
 resources:
   requests:
     cpu: 100m
-    memory: 512Mi
+    memory: 256Mi
   limits:
     cpu: 500m
-    memory: 1Gi
+    memory: 512Mi
 
 serviceMonitor:
   enabled: true
@@ -47,3 +47,9 @@ serviceMonitor:
   interval: 15s
 
 env: {} # 추가 환경변수 주입용
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70

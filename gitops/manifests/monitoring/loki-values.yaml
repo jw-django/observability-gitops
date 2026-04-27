@@ -7,6 +7,13 @@ singleBinary:
     storageClass: standard # 로컬 스토리지 사용
 
 loki:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
   auth_enabled: false # 멀티 테넌시 비활성화 (로컬용)
   commonConfig:
     replication_factor: 1
