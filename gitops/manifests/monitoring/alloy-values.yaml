@@ -118,7 +118,28 @@ alloy:
       // 로그 수집 -> Loki
       loki.source.kubernetes "pod_logs" {
         targets    = discovery.relabel.enriched_targets.output
+        forward_to = [loki.relabel.parse_json.receiver]
+      }
+      
+      // 파이프라인: JSON 파싱
+      loki.process "parse_json" {
         forward_to = [loki.relabel.stream.receiver]
+
+        stage.docker {}
+
+        stage.json {
+          expressions = {
+            "traceId" = "traceId",
+            "spanId"  = "spanId",
+          }
+        }
+      
+        // traceId를 Loki의 Structured Metadata로 승격
+        stage.structured_metadata {
+          values = {
+            "trace_id" = "traceId",
+          }
+        }
       }
 
       loki.relabel "stream" {

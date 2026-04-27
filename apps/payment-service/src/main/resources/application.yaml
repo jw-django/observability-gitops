@@ -32,7 +32,3 @@ management:
       export:
         url: "http://alloy.monitoring.svc.cluster.local:4318/v1/metrics"
         step: 15s
-
-logging:
-  pattern:
-    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

@@ -620,6 +620,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": " count(kube_namespace_created)",
           "hide": false,
           "instant": true,
@@ -3138,7 +3139,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "5s",
+  "refresh": "auto",
   "schemaVersion": 42,
   "tags": [
     "kubernetes",
@@ -3267,7 +3268,7 @@
   "timezone": "",
   "title": "K8s Cluster Dashboard",
   "uid": "4b545447f",
-  "version": 36,
+  "version": 3,
   "weekStart": "",
   "id": null
 }

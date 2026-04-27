@@ -9,17 +9,39 @@ datasources:
     datasources:
       - name: Prometheus
         type: prometheus
+        uid: prometheus
         url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
         access: proxy
         isDefault: true
+
       - name: Loki
         type: loki
+        uid: loki
         url: http://loki-gateway.monitoring.svc.cluster.local:80
         access: proxy
+
       - name: Tempo
         type: tempo
+        uid: tempo
         url: http://tempo-cluster.monitoring.svc.cluster.local:3200
         access: proxy
+        jsonData:
+          tracesToLogsV2:
+            datasourceUid: 'loki'
+
+            tags:
+              - key: 'k8s.namespace.name'
+                value: 'namespace'
+              - key: 'k8s.pod.name'
+                value: 'pod'
+              - key: 'app.kubernetes.io/name'
+                value: 'app'
+
+            filterByTraceID: true  # traceId 매칭 활성화
+            filterBySpanID: false
+
+            customQuery: true
+            query: '{$__tags} | json | traceId="${__span.traceId}"'
 
 persistence:
   enabled: true
